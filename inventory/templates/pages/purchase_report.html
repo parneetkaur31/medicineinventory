@@ -1,0 +1,68 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Purchase Report{% endblock title %}
+
+{% block content %}
+<h2 class="mb-4">Purchase Report</h2>
+
+<form method="get" class="row mb-4">
+    <div class="col-md-3">
+        <label>From Date:</label>
+        <input type="date" name="from_date" class="form-control" value="{{ from_date }}">
+    </div>
+    <div class="col-md-3">
+        <label>To Date:</label>
+        <input type="date" name="to_date" class="form-control" value="{{ to_date }}">
+    </div>
+    <div class="col-md-3">
+        <label>Vendor (Optional):</label>
+        <select name="vendor" class="form-control">
+            <option value="">All Vendors</option>
+            {% for vendor in vendors %}
+            <option value="{{ vendor.id }}" {% if vendor.id|stringformat:"s" == vendor_id %}selected{% endif %}>
+                {{ vendor.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead class="thead-light">
+        <tr>
+            <th>Purchase ID</th>
+            <th>Purchase Date</th>
+            <th>Vendor</th>
+            <th>Total</th>
+            <th>GST</th>
+            <th>Discount</th>
+            <th>Net Amount</th>
+            <th>View Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for purchase in purchases %}
+        <tr>
+            <td>{{ purchase.id }}</td>
+            <td>{{ purchase.purchase_date }}</td>
+            <td>{{ purchase.vendor.name }}</td>
+            <td>{{ purchase.total }}</td>
+            <td>{{ purchase.gst_amount }}</td>
+            <td>{{ purchase.discount_amount }}</td>
+            <td>{{ purchase.net_amount }}</td>
+            <td>
+                <a href="{% url 'purchase_report_detail' purchase.id %}" class="btn btn-info btn-sm">View Details</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8" class="text-center">No purchases found for this filter.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

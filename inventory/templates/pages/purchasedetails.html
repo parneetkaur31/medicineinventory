@@ -1,0 +1,284 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Purchase Details {% endblock title %}
+
+{% block content %}
+<div class="content">
+
+
+    <div id="notification" class="alert text-center" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px;">
+    <span id="notification-message"></span>
+</div>
+
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-chart">
+                <div class="card-header">
+                    <h4 class="card-title">Purchase Details</h4>
+                    <p class="card-category">Manage all purchase item details</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table tablesorter">
+                            <thead class="text-primary">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Purchase</th>
+                                    <th>Vendor</th>
+                                    <th>Product</th>
+                                    <th>Purchase Quantity</th>
+                                    <th>Purchase Rate</th>
+                                    <th>Purchase Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detail in purchasedetails %}
+                                <tr>
+                                    <td>{{ detail.id }}</td>
+                                    <td>Purchase #{{ detail.purchase.id }}</td>
+                                    <td>{{ detail.purchase.vendor.name }}</td>
+                                    <td>{{ detail.product.name }}</td>
+                                    <td>{{ detail.purchase_quantity }}</td>
+                                    <td>{{ detail.purchase_rate }}</td>
+                                    <td>{{ detail.purchase_amount }}</td>
+                                    <td>
+                                        <!-- Edit Button -->
+                                        <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#editPurchaseDetailModal{{ detail.id }}">
+                                            <i class="tim-icons icon-pencil"></i> Edit
+                                        </button>
+
+                                        <!-- Delete Button -->
+                                        {% if detail.id %}
+                                        <form method="POST" action="{% url 'delete_purchasedetail' detail.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+
+                                <!-- Edit Purchase Detail Modal -->
+                                <div class="modal fade" id="editPurchaseDetailModal{{ detail.id }}" tabindex="-1" role="dialog" aria-labelledby="editPurchaseDetailModalLabel{{ detail.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{% url 'update_purchasedetail' detail.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="editPurchaseDetailModalLabel{{ detail.id }}">Edit Purchase Detail</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <i class="tim-icons icon-simple-remove"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label>Purchase</label>
+                                                        <select name="purchase" class="form-control text-dark" required>
+                                                            {% for purchase in purchases %}
+                                                            <option value="{{ purchase.id }}" {% if detail.purchase.id == purchase.id %}selected{% endif %}>
+                                                                Purchase #{{ purchase.id }} | {{ purchase.vendor.name }}
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Product</label>
+                                                        <select name="product" class="form-control text-dark" required>
+                                                            {% for product in products %}
+                                                            <option value="{{ product.id }}" {% if detail.product.id == product.id %}selected{% endif %}>
+                                                                {{ product.name }}
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Quantity</label>
+                                                        <input type="number" name="purchase_quantity" id="quantity{{ detail.id }}" class="form-control text-dark" value="{{ detail.purchase_quantity }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Purchase Rate</label>
+                                                        <input type="number" step="0.01" name="purchase_rate" id="rate{{ detail.id }}" class="form-control text-dark" value="{{ detail.purchase_rate }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Purchase Amount</label>
+                                                        <input type="number" step="0.01" name="purchase_amount" id="amount{{ detail.id }}" 
+       class="form-control" style="background-color: #e9ecef; color: black;" 
+       value="{{ detail.purchase_amount }}" readonly required>
+
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-success btn-block">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No purchase details found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#addPurchaseDetailModal">
+                            Add Purchase Detail
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Purchase Detail Modal -->
+<div class="modal fade" id="addPurchaseDetailModal" tabindex="-1" role="dialog" aria-labelledby="addPurchaseDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPurchaseDetailModalLabel">Add New Purchase Detail</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="tim-icons icon-simple-remove"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Purchase</label>
+                                <select name="purchase" class="form-control text-dark" required>
+                                    <option value="">Select Purchase</option>
+                                    {% for purchase in purchases %}
+                                    <option value="{{ purchase.id }}">Purchase #{{ purchase.id }} | {{ purchase.vendor.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Product</label>
+                                <select name="product" class="form-control text-dark" required>
+                                    <option value="">Select Product</option>
+                                    {% for product in products %}
+                                    <option value="{{ product.id }}">{{ product.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+    <div class="form-group">
+    <label>Purchase Quantity</label>
+    <input type="number" name="purchase_quantity" id="add_quantity" class="form-control text-dark" required>
+</div>
+
+<div class="form-group">
+    <label>Purchase Rate</label>
+    <input type="number" step="0.01" name="purchase_rate" id="add_rate" class="form-control text-dark" required>
+</div>
+
+<div class="form-group">
+    <label>Purchase Amount</label>
+    <input type="number" step="0.01" name="purchase_amount" id="add_amount" class="form-control" 
+           style="background-color: #e9ecef; color: black;" readonly required>
+</div>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary btn-block">Add Purchase Detail</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extrajs %}
+<script>
+function showNotification(message, tag) {
+    const notification = document.getElementById('notification');
+    const messageSpan = document.getElementById('notification-message');
+    
+    messageSpan.innerText = message;
+    
+    notification.classList.remove('alert-danger', 'alert-success');  // reset classes
+    if (tag.includes('success')) {
+        notification.classList.add('alert-success');
+    } else {
+        notification.classList.add('alert-danger');
+    }
+
+    notification.style.display = 'block';
+
+    setTimeout(() => {
+        notification.style.transition = "opacity 0.5s";
+        notification.style.opacity = "0";
+        setTimeout(() => {
+            notification.style.display = 'none';
+            notification.style.opacity = "1";
+        }, 500);
+    }, 4000);
+}
+</script>
+
+<script>
+$(document).ready(function () {
+    demo.initDashboardPageCharts();
+});
+</script>
+
+{% if messages %}
+<script>
+    {% for message in messages %}
+        showNotification("{{ message|escapejs }}", "{{ message.tags }}");
+    {% endfor %}
+</script>
+{% endif %}
+<script>
+    $(document).ready(function () {
+
+        $('#add_quantity, #add_rate').on('input', function () {
+            const quantity = parseFloat($('#add_quantity').val()) || 0;
+            const rate = parseFloat($('#add_rate').val()) || 0;
+            const amount = quantity * rate;
+            $('#add_amount').val(amount.toFixed(2));
+        });
+
+    });
+</script>
+
+
+</script>
+<script>
+$(document).ready(function () {
+
+    // Add Modal Calculation
+    $('#add_quantity, #add_rate').on('input', function () {
+        const quantity = parseFloat($('#add_quantity').val()) || 0;
+        const rate = parseFloat($('#add_rate').val()) || 0;
+        const amount = quantity * rate;
+        $('#add_amount').val(amount.toFixed(2));
+    });
+
+    // Edit Modal Calculation for each row
+    {% for detail in purchasedetails %}
+    $('#quantity{{ detail.id }}, #rate{{ detail.id }}').on('input', function () {
+        const quantity = parseFloat($('#quantity{{ detail.id }}').val()) || 0;
+        const rate = parseFloat($('#rate{{ detail.id }}').val()) || 0;
+        const amount = quantity * rate;
+        $('#amount{{ detail.id }}').val(amount.toFixed(2));
+    });
+    {% endfor %}
+
+});
+</script>
+
+
+
+{% endblock extrajs %}

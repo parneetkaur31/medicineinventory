@@ -1,0 +1,33 @@
+{% extends 'layouts/base.html' %}
+{% block content %}
+
+<h2>Purchase Details for Bill: {{ purchase.bill_no }}</h2>
+<p>Vendor: {{ purchase.vendor.name }}</p>
+<p>Purchase Date: {{ purchase.purchase_date }}</p>
+<p>Net Amount: {{ purchase.net_amount }}</p>
+
+<h4 class="mt-4">Product Details</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Rate</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for detail in purchase_details %}
+        <tr>
+            <td>{{ detail.product.name }}</td>
+            <td>{{ detail.purchase_quantity }}</td>
+            <td>{{ detail.purchase_rate }}</td>
+            <td>{{ detail.purchase_amount }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center">No details found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

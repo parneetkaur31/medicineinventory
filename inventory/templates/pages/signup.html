@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up | Black Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+ 
+  <link rel="stylesheet" href="{% static 'assets/css/black-dashboard.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/nucleo-icons.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.min.css' %}">
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .navbar {
+      background-color: purple !important;
+    }
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-table {
+      background: #1a1a1a;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 500px;
+      color: #fff;
+    }
+    .theme-switch-wrapper {
+      display: flex;
+      align-items: center;
+    }
+    .theme-switch {
+      display: inline-block;
+      height: 24px;
+      position: relative;
+      width: 50px;
+    }
+    .theme-switch input {
+      display: none;
+    }
+    .slider {
+      background-color: #ccc;
+      bottom: 0;
+      cursor: pointer;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: 0.3s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      content: '🌙';
+      position: absolute;
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #fff;
+      transition: 0.3s;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+    }
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+      content: '☀️';
+    }
+  </style>
+</head>
+<body>
+
+ 
+  <nav class="navbar navbar-expand-lg navbar-absolute">
+    <div class="container-fluid">
+      <div class="navbar-wrapper">
+        <a class="navbar-brand text-white" href="#">CT ADMIN DASH</a>
+      </div>
+      <div class="ml-auto theme-switch-wrapper">
+        <label class="theme-switch">
+          <input type="checkbox" id="theme-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </nav>
+
+ 
+  <div class="login-container">
+    <div class="login-table">
+      <h3 class="text-center mb-4">SignUp to CT ADMIN</h3>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Username :</label>
+          <input type="text" name="username" class="form-control" placeholder="Username" required>
+        </div>
+        <div class="form-group">
+          <label>Email :</label>
+          <input type="email" name="email" class="form-control" placeholder="Email" required>
+        </div>
+        <div class="form-group">
+          <label>Password :</label>
+          <input type="password" name="password1" class="form-control" placeholder="Password" required>
+        </div>
+        <div class="form-group">
+          <label>Password Confirmation :</label>
+          <input type="password" name="password2" class="form-control" placeholder="Retype password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Register</button>
+      </form>
+      {% if form.errors %}
+      <div class="alert alert-danger mt-2" role="alert">
+        Please fix the errors below.
+      </div>
+      {% endif %}
+      <div class="text-center mt-3">
+        Or <a href="{% url 'auth_signin' %}">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center mt-4">
+    <small>© 2025 made with <span style="color: #e25555;">♡</span></small>
+  </footer>
+
+  
+  <script src="{% static 'assets/js/core/jquery.min.js' %}"></script>
+  <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
+  <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'assets/js/black-dashboard.min.js' %}"></script>
+
+  <script>
+    let themeToggle = document.getElementById('theme-toggle');
+    themeToggle.checked = false;  
+    document.body.classList.remove('white-content');
+
+    themeToggle.addEventListener('change', function() {
+      document.body.classList.toggle('white-content');
+    });
+  </script>
+
+</body>
+</html>

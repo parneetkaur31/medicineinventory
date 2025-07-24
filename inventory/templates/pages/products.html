@@ -1,0 +1,324 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Products {% endblock title %}
+
+{% block content %}
+<div class="content">
+    
+   
+    {% if low_stock_products %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-chart">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="card-title">⚠️ Emergency: Low Stock Products</h4>
+                    <p class="card-category">These products are below minimum reorder quantity</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table tablesorter">
+                            <thead class="text-danger">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Quantity</th>
+                                    <th>Min Reorder Qty</th>
+                                    <th>Order Now</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in low_stock_products %}
+                                <tr>
+                                    <td>{{ product.id }}</td>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.quantity }}</td>
+                                    <td>{{ product.min_reorder_quantity }}</td>
+                                    <td>
+                                        <a href="https://www.1mg.com" target="_blank" class="btn btn-danger btn-sm">
+                                            Order Now
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- End Low Stock Products Alert -->
+
+    <!-- Existing Products Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-chart">
+                <div class="card-header">
+                    <h4 class="card-title">Products</h4>
+                    <p class="card-category">Manage all registered products</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table tablesorter">
+                            <thead class="text-primary">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Vendor</th>
+                                    <th>MRP</th>
+                                    <th>Company</th>
+                                    <th>Description</th>
+                                    <th>Quantity</th>
+                                    <th>Color</th>
+                                    <th>Weight</th>
+                                    <th>Stock Value</th>
+                                    <th>Min Reorder Qty</th>
+                                    <th>Available</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                <tr>
+                                    <td>{{ product.id }}</td>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.category.name }}</td>
+                                    <td>
+                                        {% if product.vendor %}
+                                            {{ product.vendor.name }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ product.mrp }}</td>
+                                    <td>{{ product.company }}</td>
+                                    <td>{{ product.description }}</td>
+                                    <td>{{ product.quantity }}</td>
+                                    <td>{{ product.color }}</td>
+                                    <td>{{ product.weight }}</td>
+                                    <td>{{ product.stock_value }}</td>
+                                    <td>{{ product.min_reorder_quantity }}</td>
+                                    <td>
+                                        {% if product.is_available %}
+                                            Yes
+                                        {% else %}
+                                            No
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#editProductModal{{ product.id }}">
+                                            <i class="tim-icons icon-pencil"></i> Edit
+                                        </button>
+                                        <form method="POST" action="{% url 'delete_product' product.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+
+                                <!-- Edit Product Modal -->
+                                <div class="modal fade" id="editProductModal{{ product.id }}" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel{{ product.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{% url 'update_product' product.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="editProductModalLabel{{ product.id }}">Edit Product</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <i class="tim-icons icon-simple-remove"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Name</label>
+                                                                <input type="text" name="name" class="form-control text-dark" value="{{ product.name }}" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Category</label>
+                                                                <select name="category" class="form-control text-dark" required>
+                                                                    {% for category in categories %}
+                                                                    <option value="{{ category.id }}" {% if product.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Vendor</label>
+                                                                <select name="vendor" class="form-control text-dark">
+                                                                    <option value="">Select Vendor (Optional)</option>
+                                                                    {% for vendor in vendors %}
+                                                                    <option value="{{ vendor.id }}" {% if product.vendor and product.vendor.id == vendor.id %}selected{% endif %}>{{ vendor.name }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">MRP</label>
+                                                                <input type="number" step="0.01" name="mrp" class="form-control text-dark" value="{{ product.mrp }}" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Company</label>
+                                                                <input type="text" name="company" class="form-control text-dark" value="{{ product.company }}" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Description</label>
+                                                                <textarea name="description" class="form-control text-dark">{{ product.description }}</textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Quantity</label>
+                                                                <input type="number" name="quantity" class="form-control text-dark" value="{{ product.quantity }}" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Color</label>
+                                                                <input type="text" name="color" class="form-control text-dark" value="{{ product.color }}">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Weight</label>
+                                                                <input type="text" name="weight" class="form-control text-dark" value="{{ product.weight }}">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Stock Value</label>
+                                                                <input type="number" step="0.01" name="stock_value" class="form-control text-dark" value="{{ product.stock_value }}" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Min Reorder Quantity</label>
+                                                                <input type="number" name="min_reorder_quantity" class="form-control text-dark" value="{{ product.min_reorder_quantity }}" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="text-dark">Available</label>
+                                                                <select name="is_available" class="form-control text-dark" required>
+                                                                    <option value="True" {% if product.is_available %}selected{% endif %}>Yes</option>
+                                                                    <option value="False" {% if not product.is_available %}selected{% endif %}>No</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-success btn-block">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="14" class="text-center">No products found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#addProductModal">
+                            Add Product
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="tim-icons icon-simple-remove"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" name="name" class="form-control text-dark" placeholder="Product Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select name="category" class="form-control text-dark" required>
+                                    <option value="">Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Vendor</label>
+                                <select name="vendor" class="form-control text-dark">
+                                    <option value="">Select Vendor (Optional)</option>
+                                    {% for vendor in vendors %}
+                                    <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>MRP</label>
+                                <input type="number" step="0.01" name="mrp" class="form-control text-dark" placeholder="MRP" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Company</label>
+                                <input type="text" name="company" class="form-control text-dark" placeholder="Company Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea name="description" class="form-control text-dark" placeholder="Description"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <input type="number" name="quantity" class="form-control text-dark" placeholder="Quantity" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Color</label>
+                                <input type="text" name="color" class="form-control text-dark" placeholder="Color">
+                            </div>
+                            <div class="form-group">
+                                <label>Weight</label>
+                                <input type="text" name="weight" class="form-control text-dark" placeholder="Weight">
+                            </div>
+                            <div class="form-group">
+                                <label>Stock Value</label>
+                                <input type="number" step="0.01" name="stock_value" class="form-control text-dark" placeholder="Stock Value" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Min Reorder Quantity</label>
+                                <input type="number" min="0" name="min_reorder_quantity" class="form-control text-dark" placeholder="Minimum Reorder Quantity" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Available</label>
+                                <select name="is_available" class="form-control text-dark" required>
+                                    <option value="True">Yes</option>
+                                    <option value="False">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary btn-block">Add Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extrajs %}
+<script>
+    $(document).ready(function () {
+        demo.initDashboardPageCharts();
+    });
+</script>
+{% endblock extrajs %}

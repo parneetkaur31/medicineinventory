@@ -1,0 +1,203 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Customers {% endblock title %}
+
+{% block content %}
+<style>
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100%;
+    z-index: 1030;
+}
+
+.main-panel {
+    margin-left: 240px;
+}
+
+
+.content {
+    margin-top: 70px;
+}
+
+
+.notification-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    max-width: 90%;
+    width: auto;
+}
+
+
+.sidebar, .main-panel, .content {
+    transition: all 0.3s ease;
+}
+</style>
+
+<div class="content">
+    <div class="notification-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger alert-dismissible fade show text-white" role="alert" style="background-color: red;">
+                {{ message }}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-chart">
+                <div class="card-header">
+                    <h4 class="card-title">Customers</h4>
+                    <p class="card-category">Manage all registered customers</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table tablesorter" id="">
+                            <thead class="text-primary">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>Phone</th>
+                                    <th>Registration Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customers %}
+                                <tr>
+                                    <td>{{ customer.id }}</td>
+                                    <td>{{ customer.name }}</td>
+                                    <td>{{ customer.address }}</td>
+                                    <td>{{ customer.phone }}</td>
+                                    <td>{{ customer.registration_date }}</td>
+                                    <td>
+                                        <!-- Edit Button -->
+                                        <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#editCustomerModal{{ customer.id }}">
+                                            <i class="tim-icons icon-pencil"></i> Edit
+                                        </button>
+
+                                        
+                                        <form method="POST" action="{% url 'delete_customer' customer.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+
+                                <!-- Edit Customer Modal -->
+                                <div class="modal fade" id="editCustomerModal{{ customer.id }}" tabindex="-1" role="dialog" aria-labelledby="editCustomerModalLabel{{ customer.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{% url 'update_customer' customer.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title text-dark" id="editCustomerModalLabel{{ customer.id }}">Edit Customer</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <i class="tim-icons icon-simple-remove"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label class="text-dark">Name</label>
+                                                        <input type="text" name="name" class="form-control text-dark" value="{{ customer.name }}" required>
+                                                    </div>
+                                                    <div class="form-group" class="dark">
+                                                        <label class="text-dark">Address</label>
+                                                        <textarea name="address" class="form-control text-dark" required>{{ customer.address }}</textarea>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="text-dark">Phone</label>
+                                                        <input type="tel" name="phone" class="form-control text-dark" value="{{ customer.phone }}" pattern="[0-9]{10}" maxlength="10" required>
+                                                        <small class="form-text text-muted">Enter exactly 10 digits.</small>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-success btn-block">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No customers found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#addCustomerModal">
+                            Add Customer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCustomerModalLabel">Add New Customer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="tim-icons icon-simple-remove"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" name="name"  class="form-control text-dark" placeholder="Customer Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea name="address" class="form-control text-dark" placeholder="Address" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" name="phone" class="form-control text-dark" placeholder="Phone Number" pattern="[0-9]{10}" maxlength="10" required>
+                        <small class="form-text text-muted">Enter exactly 10 digits.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary btn-block">Add Customer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extrajs %}
+<script>
+    $(document).ready(function () {
+        demo.initDashboardPageCharts();
+    });
+</script>
+<script>
+setTimeout(function () {
+    document.querySelectorAll('.alert').forEach(function (alert) {
+        var bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+    });
+}, 3000);
+</script>
+
+{% endblock extrajs %}

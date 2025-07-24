@@ -1,0 +1,77 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Sale Report{% endblock title %}
+
+{% block content %}
+<div class="content">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Sale Report</h2>
+
+            <form method="get" class="row mb-4">
+                <div class="col-md-3">
+                    <label>From Date:</label>
+                    <input type="date" name="from_date" class="form-control" value="{{ from_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label>To Date:</label>
+                    <input type="date" name="to_date" class="form-control" value="{{ to_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label>Product (Optional):</label>
+                    <select name="product" class="form-control" style="color: black;">
+                        <option value="">All Products</option>
+                        {% for product in products %}
+                        <option value="{{ product.id }}" {% if product.id|stringformat:"s" == product_id %}selected{% endif %}>
+                            {{ product.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead style="background-color: #1e1e2f; color: white;">
+                        <tr>
+                            <th>Sale Date</th>
+                            <th>Invoice No</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>GST</th>
+                            <th>Discount</th>
+                            <th>Net Amount</th>
+                            <th>View Sale Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td>{{ sale.sale_date }}</td>
+                            <td>{{ sale.invoice_no }}</td>
+                            <td>{{ sale.customer.name }}</td>
+                            <td>{{ sale.total }}</td>
+                            <td>{{ sale.gst_amount }}</td>
+                            <td>{{ sale.discount_amount }}</td>
+                            <td>{{ sale.net_amount }}</td>
+                            <td>
+                                <a href="{% url 'sale_details' %}?sale_id={{ sale.id }}" class="btn btn-info btn-sm">View Details</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No sales found for this filter.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

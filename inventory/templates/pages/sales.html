@@ -1,0 +1,219 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Sales {% endblock title %}
+
+{% block content %}
+<div class="content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-chart">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="card-title">Sales</h4>
+                        <p class="card-category">Manage all sales</p>
+                    </div>
+                    <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addSaleModal">Add Sale</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table tablesorter">
+                            <thead class="text-primary">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Invoice No</th>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Net Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in sales %}
+                                <tr>
+                                    <td>{{ sale.id }}</td>
+                                    <td>{{ sale.customer.name }}</td>
+                                    <td>{{ sale.invoice_no }}</td>
+                                    <td>{{ sale.sale_date }}</td>
+                                    <td>{{ sale.total }}</td>
+                                    <td>{{ sale.net_amount }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editSaleModal{{ sale.id }}">Edit</button>
+                                        <a href="{% url 'delete_sale' sale.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                                    </td>
+                                </tr>
+
+                                <!-- Edit Sale Modal -->
+                                <div class="modal fade" id="editSaleModal{{ sale.id }}" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{% url 'update_sale' sale.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Edit Sale</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <i class="tim-icons icon-simple-remove"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label>Customer</label>
+                                                        <select name="customer" class="form-control text-dark" required>
+                                                            {% for customer in customers %}
+                                                            <option value="{{ customer.id }}" {% if customer.id == sale.customer.id %}selected{% endif %}>{{ customer.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Invoice No</label>
+                                                        <input type="text" name="invoice_no" class="form-control text-dark" value="{{ sale.invoice_no }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+    <label>Total</label>
+    <input type="number" step="0.01" name="total" id="total{{ sale.id }}" class="form-control text-dark" value="{{ sale.total }}" required>
+</div>
+<div class="form-group">
+    <label>GST Rate (%)</label>
+    <input type="number" step="0.01" name="gst_rate" id="gst_rate{{ sale.id }}" class="form-control text-dark" value="{{ sale.gst_rate }}" required>
+</div>
+<div class="form-group">
+    <label>GST Amount</label>
+    <input type="number" step="0.01" name="gst_amount" id="gst_amount{{ sale.id }}" class="form-control" style="background-color:#e9ecef; color:black;" value="{{ sale.gst_amount }}" readonly required>
+</div>
+<div class="form-group">
+    <label>Discount Rate (%)</label>
+    <input type="number" step="0.01" name="discount_rate" id="discount_rate{{ sale.id }}" class="form-control text-dark" value="{{ sale.discount_rate }}" required>
+</div>
+<div class="form-group">
+    <label>Discount Amount</label>
+    <input type="number" step="0.01" name="discount_amount" id="discount_amount{{ sale.id }}" class="form-control" style="background-color:#e9ecef; color:black;" value="{{ sale.discount_amount }}" readonly required>
+</div>
+<div class="form-group">
+    <label>Net Amount</label>
+    <input type="number" step="0.01" name="net_amount" id="net_amount{{ sale.id }}" class="form-control" style="background-color:#e9ecef; color:black;" value="{{ sale.net_amount }}" readonly required>
+</div>
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Sale Modal -->
+<div class="modal fade" id="addSaleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Sale</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="tim-icons icon-simple-remove"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Customer</label>
+                        <select name="customer" class="form-control text-dark" required>
+                            <option value="">Select Customer</option>
+                            {% for customer in customers %}
+                            <option value="{{ customer.id }}">{{ customer.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Invoice No</label>
+                        <input type="text" name="invoice_no" class="form-control text-dark" required>
+                    </div>
+                    <div class="form-group">
+        <label>Total</label>
+    <input type="number" step="0.01" name="total" id="add_total" class="form-control text-dark" required>
+</div>
+<div class="form-group">
+    <label>GST Rate (%)</label>
+    <input type="number" step="0.01" name="gst_rate" id="add_gst_rate" class="form-control text-dark" required>
+</div>
+<div class="form-group">
+    <label>GST Amount</label>
+    <input type="number" step="0.01" name="gst_amount" id="add_gst_amount" class="form-control" style="background-color:#e9ecef; color:black;" readonly required>
+</div>
+<div class="form-group">
+    <label>Discount Rate (%)</label>
+    <input type="number" step="0.01" name="discount_rate" id="add_discount_rate" class="form-control text-dark" required>
+</div>
+<div class="form-group">
+    <label>Discount Amount</label>
+    <input type="number" step="0.01" name="discount_amount" id="add_discount_amount" class="form-control" style="background-color:#e9ecef; color:black;" readonly required>
+</div>
+<div class="form-group">
+    <label>Net Amount</label>
+    <input type="number" step="0.01" name="net_amount" id="add_net_amount" class="form-control" style="background-color:#e9ecef; color:black;" readonly required>
+</div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary btn-block">Add Sale</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+{% block extrajs %}
+<script>
+$(document).ready(function () {
+
+    $('#add_total, #add_gst_rate, #add_discount_rate').on('input', function () {
+        const total = parseFloat($('#add_total').val()) || 0;
+        const gstRate = parseFloat($('#add_gst_rate').val()) || 0;
+        const discountRate = parseFloat($('#add_discount_rate').val()) || 0;
+
+        const gstAmount = (total * gstRate) / 100;
+        const discountAmount = (total * discountRate) / 100;
+        const netAmount = total + gstAmount - discountAmount;
+
+        $('#add_gst_amount').val(gstAmount.toFixed(2));
+        $('#add_discount_amount').val(discountAmount.toFixed(2));
+        $('#add_net_amount').val(netAmount.toFixed(2));
+    });
+
+});
+</script>
+<script>
+$(document).ready(function () {
+
+    {% for sale in sales %}
+    $('#total{{ sale.id }}, #gst_rate{{ sale.id }}, #discount_rate{{ sale.id }}').on('input', function () {
+        const total = parseFloat($('#total{{ sale.id }}').val()) || 0;
+        const gstRate = parseFloat($('#gst_rate{{ sale.id }}').val()) || 0;
+        const discountRate = parseFloat($('#discount_rate{{ sale.id }}').val()) || 0;
+
+        const gstAmount = (total * gstRate) / 100;
+        const discountAmount = (total * discountRate) / 100;
+        const netAmount = total + gstAmount - discountAmount;
+
+        $('#gst_amount{{ sale.id }}').val(gstAmount.toFixed(2));
+        $('#discount_amount{{ sale.id }}').val(discountAmount.toFixed(2));
+        $('#net_amount{{ sale.id }}').val(netAmount.toFixed(2));
+    });
+    {% endfor %}
+
+});
+</script>
+
+
+{% endblock extrajs %}

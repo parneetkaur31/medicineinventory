@@ -1,0 +1,191 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Vendors{% endblock title %}
+
+{% block content %}
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-chart">
+                <div class="card-header">
+                    <h4 class="card-title">Vendors</h4>
+                    <p class="card-category">Manage Vendors</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table tablesorter">
+                            <thead class="text-primary">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>GST No.</th>
+                                    <th>Active</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vendor in vendors %}
+                                <tr>
+                                    <td>{{ vendor.id }}</td>
+                                    <td>{{ vendor.name }}</td>
+                                    <td>{{ vendor.address }}</td>
+                                    <td>{{ vendor.phone }}</td>
+                                    <td>{{ vendor.email }}</td>
+                                    <td>{{ vendor.gst_number }}</td>
+                                    <td>
+                                        {% if vendor.is_active %}
+                                            <span class="badge badge-success">Yes</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editVendorModal{{ vendor.id }}">Edit</button>
+                                        <a href="{% url 'delete_vendor' vendor.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                                    </td>
+                                </tr>
+
+                                <!-- Edit Modal -->
+                                <div class="modal fade" id="editVendorModal{{ vendor.id }}" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{% url 'update_vendor' vendor.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Edit Vendor</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <i class="tim-icons icon-simple-remove"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label class="text-dark">Name</label>
+                                                        <input type="text" name="name" class="form-control text-dark" value="{{ vendor.name }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="text-dark">Address</label>
+                                                        <textarea name="address" class="form-control text-dark" required>{{ vendor.address }}</textarea>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="text-dark">Phone</label>
+                                                        <input type="text" name="phone" class="form-control text-dark" value="{{ vendor.phone }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="text-dark">Email</label>
+                                                        <input type="email" name="email" class="form-control text-dark" value="{{ vendor.email }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="text-dark">GST Number</label>
+                                                        <input type="text" name="gst_number" class="form-control text-dark" value="{{ vendor.gst_number }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="text-dark">Active</label>
+                                                        <select name="is_active" class="form-control text-dark">
+                                                            <option value="True" {% if vendor.is_active %}selected{% endif %}>Yes</option>
+                                                            <option value="False" {% if not vendor.is_active %}selected{% endif %}>No</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Add Vendor Button -->
+                    <button class="btn btn-primary my-3" data-toggle="modal" data-target="#addVendorModal">Add Vendor</button>
+
+                    <!-- Add Modal -->
+                    <div class="modal fade" id="addVendorModal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Add Vendor</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <i class="tim-icons icon-simple-remove"></i>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label class="text-dark">Name</label>
+                                            <input type="text" name="name" class="form-control text-dark" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-dark">Address</label>
+                                            <textarea name="address" class="form-control text-dark" required></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-dark">Phone</label>
+                                            <input type="text" name="phone" class="form-control text-dark" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-dark">Email</label>
+                                            <input type="email" name="email" class="form-control text-dark" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-dark">GST Number</label>
+                                            <input type="text" name="gst_number" class="form-control text-dark" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-dark">Active</label>
+                                            <select name="is_active" class="form-control text-dark">
+                                                <option value="True">Yes</option>
+                                                <option value="False">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary btn-block">Add Vendor</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extrajs %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function (alert) {
+            alert.classList.remove('show');
+            alert.classList.add('fade');
+            setTimeout(function () {
+                alert.remove();
+            }, 500); // Wait for fade transition
+        });
+    }, 3000);
+});
+</script>
+{% endblock extrajs %}
