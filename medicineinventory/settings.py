@@ -21,7 +21,9 @@ SECRET_KEY = 'django-insecure-vs8g05qxq#3ss)+b4$w6xs=t#m$n+r-o0ij2(b(j4oq77g9641
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+import os
+
+ALLOWED_HOSTS = ['*'] 
 
 
 
@@ -38,6 +40,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -109,9 +112,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-STATIC_URL = 'static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

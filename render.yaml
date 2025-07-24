@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: medicine-inventory
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn medicineinventory.wsgi"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: your-db-name-here
+          property: connectionString
+      - key: SECRET_KEY
+        value: your-secret-key-here
